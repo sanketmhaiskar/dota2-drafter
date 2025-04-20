@@ -1,0 +1,57 @@
+# File: phi3-draft-config.yaml
+
+base_model: microsoft/phi-3-mini-4k-instruct
+tokenizer_type: AutoTokenizer
+trust_remote_code: true
+
+load_in_4bit: true
+bnb_4bit_compute_dtype: float16
+bnb_4bit_use_double_quant: true
+bnb_4bit_quant_type: nf4
+
+datasets:
+  - path: ./../draft_training_data.jsonl
+    type: completion
+    field_format:
+      prompt: "prompt"
+      response: "response"
+
+dataset_prepared_path: last_prepared_phi3_draft
+
+val_set_size: 0.02
+output_dir: ./../phi3-draft-out
+
+sequence_len: 2048
+sample_packing: true
+pad_to_sequence_len: true
+
+adapter: lora
+lora_r: 16
+lora_alpha: 32
+lora_dropout: 0.05
+lora_target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
+
+gradient_accumulation_steps: 4
+micro_batch_size: 2
+num_epochs: 3
+optimizer: adamw_bnb_8bit
+lr_scheduler: cosine
+learning_rate: 2e-5
+train_on_inputs: false
+group_by_length: false
+gradient_checkpointing: true
+early_stopping_patience: 3
+
+precision: float16
+use_flash_attention_2: false
+
+logging_steps: 10
+save_strategy: "epoch"
+save_safetensors: true
